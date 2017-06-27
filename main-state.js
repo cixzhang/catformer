@@ -122,13 +122,9 @@ var mainState = {
                 cat.obedient = !(now - mainState.lastObedient > 1000);
             }
 
-            // Disobedient cat performs a random action and presses random keys
             if (!cat.obedient) {
                 cat.state = cat.random();
                 console.log('cat state', cat.state);
-                _.each(_.keys(keyCheck), function(key) {
-                    keyCheck[key] = Math.random() > 0.5;
-                });
             }
         }
 
@@ -139,6 +135,11 @@ var mainState = {
                     cat.state = stateKeys[key];
                 }
                 return found;
+            });
+        } else {
+            // Disobedient cat presses random keys
+            _.each(_.keys(keyCheck), function(key) {
+                keyCheck[key] = Math.random() > 0.5;
             });
         }
 
