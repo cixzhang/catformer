@@ -63,7 +63,7 @@
   var cat = {
     STATES: STATES,
     TRANSITIONS: TRANSITIONS,
-    state: STATES.sleep,
+    state: STATES.stand,
     obedient: false,
     random: () => {
       var index = 0;
