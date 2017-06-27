@@ -98,6 +98,7 @@ var mainState = {
         // Call the 'restart' function when the player touches the enemy
         game.physics.arcade.overlap(this.player, this.hazards, this.restart, null, this);
 
+        // Here we update the game 60 times per second
         var now = Date.now();
         mainState.lastObedient = mainState.lastObedient || now;
         mainState.lastObedientCheck = mainState.lastObedientCheck || now;
@@ -131,7 +132,6 @@ var mainState = {
             }
         }
 
-        // Here we update the game 60 times per second
         if (cat.obedient || window.CAT_TREATS) {
             _.some(keyCheck, function(check, key) {
                 var found = check && key in stateKeys;
