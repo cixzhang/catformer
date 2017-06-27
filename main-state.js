@@ -89,21 +89,6 @@ var mainState = {
     },
 
     update: function() {
-        var now = Date.now();
-        mainState.lastObedient = mainState.lastObedient || now;
-        mainState.lastObedientCheck = mainState.lastObedientCheck || now;
-
-        if (now - mainState.lastObedientCheck > 1000) {
-            mainState.lastObedientCheck = now;
-            if (!cat.obedient) {
-                cat.obedient = Math.random() > 0.5;
-                mainState.lastObedient = mainState.lastObedient || (cat.obedient * now);
-            } else {
-                cat.obedient = !(now - mainState.lastObedient > 1000);
-            }
-            console.log('obedience', cat.obedient);
-        }
-
         // Make the player and the walls collide
         game.physics.arcade.collide(this.player, this.walls);
 
@@ -113,7 +98,9 @@ var mainState = {
         // Call the 'restart' function when the player touches the enemy
         game.physics.arcade.overlap(this.player, this.hazards, this.restart, null, this);
 
-        // Here we update the game 60 times per second
+        var now = Date.now();
+        mainState.lastObedient = mainState.lastObedient || now;
+        mainState.lastObedientCheck = mainState.lastObedientCheck || now;
 
         var stateKeys = cat.TRANSITIONS[cat.state].keys;
 
@@ -125,20 +112,33 @@ var mainState = {
             space: this.cursor.jump.isDown
         };
 
-        if (cat.obedient) {
+        if (now - mainState.lastObedientCheck > 1000 && !window.CAT_TREATS) {
+            mainState.lastObedientCheck = now;
+            if (!cat.obedient) {
+                cat.obedient = Math.random() > 0.5;
+                mainState.lastObedient = mainState.lastObedient || (cat.obedient * now);
+            } else {
+                cat.obedient = !(now - mainState.lastObedient > 1000);
+            }
+
+            // Disobedient cat performs a random action and presses random keys
+            if (!cat.obedient) {
+                cat.state = cat.random();
+                console.log('cat state', cat.state);
+                _.each(_.keys(keyCheck), function(key) {
+                    keyCheck[key] = Math.random() > 0.5;
+                });
+            }
+        }
+
+        // Here we update the game 60 times per second
+        if (cat.obedient || window.CAT_TREATS) {
             _.some(keyCheck, function(check, key) {
                 var found = check && key in stateKeys;
                 if (found) {
                     cat.state = stateKeys[key];
                 }
                 return found;
-            });
-        } else {
-            cat.state = cat.random();
-
-            // Randomly press some keys
-            _.each(_.keys(keyCheck), function(key) {
-                keyCheck[key] = Math.random() > 0.5;
             });
         }
 
@@ -162,5 +162,7 @@ var mainState = {
                 cat.state = cat.STATES.stand;
             }
         }
+
+        // TODO: cat rendering after all state resolutions here
     },
 };
