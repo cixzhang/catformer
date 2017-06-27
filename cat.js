@@ -12,31 +12,52 @@
   var TRANSITIONS = [];
   TRANSITIONS[STATES.sleep] = {
     list: [STATES.sleep, STATES.lay],
-    keys: [['down'], ['up']]
+    keys: {
+      down: STATES.sleep,
+      up: STATES.lay
+    }
   };
   TRANSITIONS[STATES.lay] = {
     list: [STATES.sleep, STATES.lay, STATES.sit],
-    keys: [['down'], null, ['up']]
+    keys: {
+      down: STATES.sleep,
+      up: STATES.sit
+    }
   };
   TRANSITIONS[STATES.sit] = {
     list: [STATES.lay, STATES.sit, STATES.lick, STATES.stand],
-    keys: [['down'], null, null, ['up']]
+    keys: {
+      down: STATES.lay,
+      up: STATES.stand
+    }
   };
   TRANSITIONS[STATES.lick] = {
     list: [STATES.sit, STATES.lick],
-    keys: [['up'], null]
+    keys: { default: STATES.sit }
   };
   TRANSITIONS[STATES.stand] = {
     list: [STATES.sit, STATES.stand, STATES.move, STATES.jump],
-    keys: [['down'], null, ['left', 'right'], ['space']]
+    keys: {
+      down: STATES.sit,
+      left: STATES.move,
+      right: STATES.move,
+      space: STATES.jump
+    }
   };
   TRANSITIONS[STATES.move] = {
     list: [STATES.stand, STATES.move, STATES.jump],
-    keys: [null, ['left', 'right'], ['space']]
+    keys: {
+      left: STATES.move,
+      right: STATES.move,
+      space: STATES.jump
+    }
   };
   TRANSITIONS[STATES.jump] = {
     list: [STATES.stand, STATES.move],
-    keys: [null, ['left', 'right']]
+    keys: {
+      left: STATES.move,
+      right: STATES.move
+    }
   };
 
   var cat = {

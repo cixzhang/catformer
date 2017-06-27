@@ -33,8 +33,13 @@ var mainState = {
         game.world.enableBody = true;
 
         // Variable to store the arrow key pressed
-        this.cursor = game.input.keyboard.createCursorKeys();
-
+        this.cursor = game.input.keyboard.addKeys({
+            'up': Phaser.KeyCode.UP,
+            'down': Phaser.KeyCode.DOWN,
+            'left': Phaser.KeyCode.LEFT,
+            'right': Phaser.KeyCode.RIGHT,
+            'jump': Phaser.KeyCode.SPACEBAR
+        });
         // Create the player in the middle of the game
         this.player = game.add.sprite(70, 100, 'player');
 
@@ -109,16 +114,53 @@ var mainState = {
         game.physics.arcade.overlap(this.player, this.hazards, this.restart, null, this);
 
         // Here we update the game 60 times per second
-        if (this.cursor.left.isDown) 
-            this.player.body.velocity.x = -200;
-        else if (this.cursor.right.isDown) 
-            this.player.body.velocity.x = 200;
-        else 
-            this.player.body.velocity.x = 0;
 
-        // Make the player jump if he is touching the ground
-        if (this.cursor.up.isDown && this.player.body.touching.down) {
-            this.player.body.velocity.y = -250;
+        var stateKeys = cat.TRANSITIONS[cat.state].keys;
+
+        var keyCheck = {
+            up: this.cursor.up.isDown,
+            down: this.cursor.down.isDown,
+            left: this.cursor.left.isDown,
+            right: this.cursor.right.isDown,
+            space: this.cursor.jump.isDown
+        };
+
+        if (cat.obedient) {
+            _.some(keyCheck, function(check, key) {
+                var found = check && key in stateKeys;
+                if (found) {
+                    cat.state = stateKeys[key];
+                }
+                return found;
+            });
+        } else {
+            cat.state = cat.random();
+
+            // Randomly press some keys
+            _.each(_.keys(keyCheck), function(key) {
+                keyCheck[key] = Math.random() > 0.5;
+            });
+        }
+
+        if (cat.state === cat.STATES.move || cat.state === cat.STATES.jump) {
+            // Make the player jump if he is touching the ground
+            if (keyCheck.space && this.player.body.touching.down) {
+                this.player.body.velocity.y = -250;
+                cat.state = cat.STATES.jump;
+            }
+
+            if (!this.player.body.touching.down) {
+                cat.state = cat.STATES.move;
+            }
+
+            if (keyCheck.left) {
+                this.player.body.velocity.x = -200;
+            } else if (keyCheck.right) {
+                this.player.body.velocity.x = 200;
+            } else {
+                this.player.body.velocity.x = 0;
+                cat.state = cat.STATES.stand;
+            }
         }
     },
 };
