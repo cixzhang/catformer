@@ -1,4 +1,7 @@
-var mainState = {  
+var mainState = {
+
+    lastObedient: null,
+    lastObedientCheck: null,
 
     // Function to kill a coin
     takeCoin: function(player, coin) {
@@ -80,7 +83,22 @@ var mainState = {
         }
     },
 
-    update: function() {  
+    update: function() {
+        var now = Date.now();
+        mainState.lastObedient = mainState.lastObedient || now;
+        mainState.lastObedientCheck = mainState.lastObedientCheck || now;
+
+        if (now - mainState.lastObedientCheck > 1000) {
+            mainState.lastObedientCheck = now;
+            if (!cat.obedient) {
+                cat.obedient = Math.random() > 0.5;
+                mainState.lastObedient = mainState.lastObedient || (cat.obedient * now);
+            } else {
+                cat.obedient = !(now - mainState.lastObedient > 1000);
+            }
+            console.log('obedience', cat.obedient);
+        }
+
         // Make the player and the walls collide
         game.physics.arcade.collide(this.player, this.walls);
 

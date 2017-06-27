@@ -10,21 +10,43 @@
   };
 
   var TRANSITIONS = [];
-  TRANSITIONS[STATES.sleep] = [STATES.sleep, STATES.lay];
-  TRANSITIONS[STATES.lay] = [STATES.sleep, STATES.lay, STATES.sit];
-  TRANSITIONS[STATES.sit] = [STATES.lay, STATES.sit, STATES.lick, STATES.stand];
-  TRANSITIONS[STATES.lick] = [STATES.sit, STATES.lick];
-  TRANSITIONS[STATES.stand] = [STATES.sit, STATES.stand, STATES.move, STATES.jump];
-  TRANSITIONS[STATES.move] = [STATES.stand, STATES.move, STATES.jump];
-  TRANSITIONS[STATES.jump] = [STATES.stand, STATES.move];
+  TRANSITIONS[STATES.sleep] = {
+    list: [STATES.sleep, STATES.lay],
+    keys: [['down'], ['up']]
+  };
+  TRANSITIONS[STATES.lay] = {
+    list: [STATES.sleep, STATES.lay, STATES.sit],
+    keys: [['down'], null, ['up']]
+  };
+  TRANSITIONS[STATES.sit] = {
+    list: [STATES.lay, STATES.sit, STATES.lick, STATES.stand],
+    keys: [['down'], null, null, ['up']]
+  };
+  TRANSITIONS[STATES.lick] = {
+    list: [STATES.sit, STATES.lick],
+    keys: [['up'], null]
+  };
+  TRANSITIONS[STATES.stand] = {
+    list: [STATES.sit, STATES.stand, STATES.move, STATES.jump],
+    keys: [['down'], null, ['left', 'right'], ['space']]
+  };
+  TRANSITIONS[STATES.move] = {
+    list: [STATES.stand, STATES.move, STATES.jump],
+    keys: [null, ['left', 'right'], ['space']]
+  };
+  TRANSITIONS[STATES.jump] = {
+    list: [STATES.stand, STATES.move],
+    keys: [null, ['left', 'right']]
+  };
 
   var cat = {
     STATES: STATES,
     TRANSITIONS: TRANSITIONS,
     state: STATES.sleep,
+    obedient: false,
     random: () => {
       var index = 0;
-      var transitions = TRANSITIONS[cat.state];
+      var transitions = TRANSITIONS[cat.state].list;
       var rand = Math.random();
       // Prefer transitioning to poorer states
       while (rand > 0.5 && index < transitions.length - 1) {
