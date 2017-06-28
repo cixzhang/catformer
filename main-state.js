@@ -14,6 +14,7 @@ var mainState = {
         // tilesets
         game.load.tilemap('tilemap', 'assets/test_map2.json', null, Phaser.Tilemap.TILED_JSON);
         game.load.image('tiles', 'assets/sprites/tileset.png');
+        game.load.spritesheet('cat', 'assets/sprites/cat.png', 16, 16);
     },
 
     create: function() {  
@@ -46,7 +47,14 @@ var mainState = {
             'jump': Phaser.KeyCode.SPACEBAR
         });
         // Create the player in the middle of the game
-        this.player = game.add.sprite(70, 100, 'test_cat');
+        this.player = game.add.sprite(70, 100, 'cat', 5);
+        this.player.animations.add(cat.STATES.sleep, [0, 1, 2, 3, 4]);
+        this.player.animations.add(cat.STATES.lay, [5, 6, 7, 8, 9]);
+        this.player.animations.add(cat.STATES.sit, [10, 11, 12, 13, 14]);
+        this.player.animations.add(cat.STATES.lick, [15, 16, 17, 18, 19]);
+        this.player.animations.add(cat.STATES.stand, [20, 21, 22, 23, 24]);
+        this.player.animations.add(cat.STATES.move, [15, 16, 17, 18, 19]);
+        this.player.animations.add(cat.STATES.jump, [30, 31, 32, 33, 34]);
 
         this.game.physics.arcade.enable(this.player);
 
@@ -136,7 +144,6 @@ var mainState = {
             }
         }
 
-        // TODO: cat rendering after all state resolutions here
-        
+        this.player.animations.play(cat.state, 2, true);
     },
 };
