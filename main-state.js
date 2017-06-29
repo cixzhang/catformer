@@ -98,9 +98,9 @@ var mainState = {
             this.lastObedientCheck = now;
             if (!cat.obedient) {
                 cat.obedient = Math.random() > 0.5;
-                this.lastObedient = this.lastObedient || (cat.obedient * now);
+                this.lastObedient = (cat.obedient * now) || this.lastObedient;
             } else {
-                cat.obedient = !(now - this.lastObedient > 1000);
+                cat.obedient = !(now - this.lastObedient > 5000);
             }
 
             if (!cat.obedient) {
