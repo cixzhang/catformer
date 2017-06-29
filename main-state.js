@@ -1,9 +1,8 @@
+/* globals Phaser _ game cat */
+/* eslint no-console: 0 */
+
 var mainState = {
-
-    lastObedient: null,
-    lastObedientCheck: null,
-
-    preload: function() {  
+    preload: function() {
         // Here we preload the assets
         game.load.image('test_cat', 'assets/sprites/test_cat.png');
 
@@ -13,14 +12,14 @@ var mainState = {
         game.load.spritesheet('cat', 'assets/sprites/cat.png', 16, 16);
 
         // game scaling
-        game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;  
+        game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
         game.scale.setUserScale(3, 3);
 
-        game.renderer.renderSession.roundPixels = true;  
-        Phaser.Canvas.setImageRenderingCrisp(this.game.canvas)  
+        game.renderer.renderSession.roundPixels = true;
+        Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);
     },
 
-    create: function() {  
+    create: function() {
         // Here we create the game
         // Set the background color to blue
         game.stage.backgroundColor = '#49a';
@@ -33,7 +32,7 @@ var mainState = {
 
         this.collisionLayer = this.map.createLayer('Collision');
         this.backgroundLayer = this.map.createLayer('Background');
-    
+
         //Before you can use the collide function you need to set what tiles can collide
         this.map.setCollisionBetween(1, 100, true, 'Collision');
 
@@ -55,8 +54,9 @@ var mainState = {
         this.player.animations.add(cat.STATES.sit, [10, 11, 12, 13, 14]);
         this.player.animations.add(cat.STATES.lick, [15, 16, 17, 18, 19]);
         this.player.animations.add(cat.STATES.stand, [20, 21, 22, 23, 24]);
-        this.player.animations.add(cat.STATES.move, [15, 16, 17, 18, 19]);
+        this.player.animations.add(cat.STATES.move, [25, 26, 27, 28, 29]);
         this.player.animations.add(cat.STATES.jump, [30, 31, 32, 33, 34]);
+        this.player.anchor.setTo(.5,.5);
 
         game.physics.arcade.enable(this.player);
 
@@ -68,36 +68,48 @@ var mainState = {
 
         // Add gravity to make it fall
         this.player.body.gravity.y = 600;
+
+        // Keep track of keys pressed
+        this.keyCheck = {
+            up: false,
+            down: false,
+            left: false,
+            right: false,
+            space: false
+        };
+
+        this.facing = -1;
+
+        // Timers
+        this.lastObedient = null;
+        this.lastObedientCheck = null;
+        this.lastKeyCheck = null;
     },
 
     update: function() {
 
         // Here we update the game 60 times per second
         var now = Date.now();
-        mainState.lastObedient = mainState.lastObedient || now;
-        mainState.lastObedientCheck = mainState.lastObedientCheck || now;
+        this.lastObedient = this.lastObedient || now;
+        this.lastObedientCheck = this.lastObedientCheck || now;
+        this.lastKeyCheck = this.lastKeyCheck || now;
 
-        var stateKeys = cat.TRANSITIONS[cat.state].keys;
-
-        var keyCheck = {
-            up: this.cursor.up.isDown,
-            down: this.cursor.down.isDown,
-            left: this.cursor.left.isDown,
-            right: this.cursor.right.isDown,
-            space: this.cursor.jump.isDown
-        };
-
-        if (now - mainState.lastObedientCheck > 1000 && !window.CAT_TREATS) {
-            mainState.lastObedientCheck = now;
+        if (now - this.lastObedientCheck > 1000 && !window.CAT_TREATS) {
+            this.lastObedientCheck = now;
             if (!cat.obedient) {
                 cat.obedient = Math.random() > 0.5;
-                mainState.lastObedient = mainState.lastObedient || (cat.obedient * now);
+                this.lastObedient = this.lastObedient || (cat.obedient * now);
             } else {
-                cat.obedient = !(now - mainState.lastObedient > 1000);
+                cat.obedient = !(now - this.lastObedient > 1000);
             }
 
             if (!cat.obedient) {
                 cat.state = cat.random();
+                // Disobedient cat presses random keys
+                _.each(_.keys(this.keyCheck), (key) => {
+                    this.keyCheck[key] = Math.random() > 0.5;
+                });
+                cat.machine(this.keyCheck);
                 console.log('cat state', cat.state);
             }
         }
@@ -105,41 +117,51 @@ var mainState = {
         game.physics.arcade.collide(this.player, this.collisionLayer);
 
         if (cat.obedient || window.CAT_TREATS) {
-            _.some(keyCheck, function(check, key) {
-                var found = check && key in stateKeys;
-                if (found) {
-                    cat.state = stateKeys[key];
-                }
-                return found;
-            });
-        } else {
-            // Disobedient cat presses random keys
-            _.each(_.keys(keyCheck), function(key) {
-                keyCheck[key] = Math.random() > 0.5;
-            });
+            this.keyCheck = {
+                up: this.cursor.up.isDown,
+                down: this.cursor.down.isDown,
+                left: this.cursor.left.isDown,
+                right: this.cursor.right.isDown,
+                space: this.cursor.jump.isDown
+            };
+
+            // short delay between state swaps
+            if (now - this.lastKeyCheck > 100) {
+                this.lastKeyCheck = now;
+                cat.machine(this.keyCheck);
+            }
         }
 
+        var willFace = this.facing;
         if (cat.state === cat.STATES.move || cat.state === cat.STATES.jump) {
             // Make the player jump if he is touching the ground
-            if (keyCheck.space && this.player.body.blocked.down) {
+            if (this.keyCheck.space && this.player.body.blocked.down) {
                 this.player.body.velocity.y = -250;
-                cat.state = cat.STATES.jump;
+                cat.state = cat.STATES.stand;
             }
 
-            if (!this.player.body.blocked.down) {
-                cat.state = cat.STATES.move;
-            }
-
-            if (keyCheck.left) {
-                this.player.body.velocity.x = -200;
-            } else if (keyCheck.right) {
-                this.player.body.velocity.x = 200;
+            if (this.keyCheck.left) {
+                willFace = -1;
+                this.player.body.velocity.x = -100;
+                cat.state === cat.STATES.move;
+            } else if (this.keyCheck.right) {
+                willFace = 1;
+                this.player.body.velocity.x = 100;
+                cat.state === cat.STATES.move;
             } else {
                 this.player.body.velocity.x = 0;
                 cat.state = cat.STATES.stand;
             }
         }
 
-        this.player.animations.play(cat.state, 2, true);
-    },
+        if (!this.player.body.blocked.down) {
+            cat.state = cat.STATES.jump;
+        }
+
+        if (willFace !== this.facing) {
+            this.player.scale.x *= -1;
+            this.facing = willFace;
+        }
+        this.player.animations.play(cat.state, cat.state + 1, true);
+    }
 };

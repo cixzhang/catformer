@@ -75,6 +75,16 @@
         index++;
       }
       return transitions[index];
+    },
+    machine: (pressed) => {
+      var keys = _.keys(TRANSITIONS[cat.state].keys);
+      _.some(keys, (key) => {
+        if (pressed[key]) {
+          cat.state = TRANSITIONS[cat.state].keys[key];
+          return true;
+        }
+        return false;
+      });
     }
   };
 
