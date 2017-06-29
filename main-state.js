@@ -58,27 +58,19 @@ var mainState = {
         this.player.animations.add(cat.STATES.move, [15, 16, 17, 18, 19]);
         this.player.animations.add(cat.STATES.jump, [30, 31, 32, 33, 34]);
 
-        this.game.physics.arcade.enable(this.player);
+        game.physics.arcade.enable(this.player);
 
         //this.player.smoothed = false;
         //this.player.scale.set(4);
 
         // camera
-        this.game.camera.follow(this.player);
+        game.camera.follow(this.player, Phaser.Camera.FOLLOW_LOCKON, 0.1, 0.1);
 
         // Add gravity to make it fall
         this.player.body.gravity.y = 600;
     },
 
     update: function() {
-        // Make the player and the walls collide
-        game.physics.arcade.collide(this.player, this.walls);
-
-        // Call the 'takeCoin' function when the player takes a coin
-        game.physics.arcade.overlap(this.player, this.coins, this.takeCoin, null, this);
-
-        // Call the 'restart' function when the player touches the enemy
-        game.physics.arcade.overlap(this.player, this.hazards, this.restart, null, this);
 
         // Here we update the game 60 times per second
         var now = Date.now();
@@ -109,7 +101,6 @@ var mainState = {
                 console.log('cat state', cat.state);
             }
         }
-
 
         game.physics.arcade.collide(this.player, this.collisionLayer);
 
