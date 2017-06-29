@@ -5,16 +5,19 @@ var mainState = {
 
     preload: function() {  
         // Here we preload the assets
-        game.load.image('player', 'assets/sprites/player.png');
-        game.load.image('wall', 'assets/sprites/wall.png');
-        game.load.image('coin', 'assets/sprites/coin.png');
-        game.load.image('lava', 'assets/sprites/lava.png');
         game.load.image('test_cat', 'assets/sprites/test_cat.png');
 
         // tilesets
         game.load.tilemap('tilemap', 'assets/test_map2.json', null, Phaser.Tilemap.TILED_JSON);
         game.load.image('tiles', 'assets/sprites/tileset.png');
         game.load.spritesheet('cat', 'assets/sprites/cat.png', 16, 16);
+
+        // game scaling
+        game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;  
+        game.scale.setUserScale(3, 3);
+
+        game.renderer.renderSession.roundPixels = true;  
+        Phaser.Canvas.setImageRenderingCrisp(this.game.canvas)  
     },
 
     create: function() {  
@@ -30,7 +33,6 @@ var mainState = {
 
         this.collisionLayer = this.map.createLayer('Collision');
         this.backgroundLayer = this.map.createLayer('Background');
-        //this.map.setCollisionBetween(1, 100, true, 'Tile Layer 1');
     
         //Before you can use the collide function you need to set what tiles can collide
         this.map.setCollisionBetween(1, 100, true, 'Collision');
@@ -57,6 +59,9 @@ var mainState = {
         this.player.animations.add(cat.STATES.jump, [30, 31, 32, 33, 34]);
 
         this.game.physics.arcade.enable(this.player);
+
+        //this.player.smoothed = false;
+        //this.player.scale.set(4);
 
         // camera
         this.game.camera.follow(this.player);
