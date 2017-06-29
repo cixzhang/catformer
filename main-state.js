@@ -165,6 +165,9 @@ var mainState = {
 
         if (!this.player.body.blocked.down) {
             cat.state = cat.STATES.jump;
+            this.player.angle += (10 * this.facing);
+        } else {
+            this.player.angle = 0;
         }
 
         if (willFace !== this.facing) {
