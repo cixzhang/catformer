@@ -133,6 +133,8 @@ var mainState = {
         }
 
         var willFace = this.facing;
+
+        this.player.body.velocity.x = 0;
         if (cat.state === cat.STATES.move || cat.state === cat.STATES.jump) {
             // Make the player jump if he is touching the ground
             if (this.keyCheck.space && this.player.body.blocked.down) {
