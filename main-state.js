@@ -95,7 +95,10 @@ var mainState = {
 
         game.physics.arcade.collide(this.player, this.collisionLayer);
         game.physics.arcade.collide(this.birds, this.collisionLayer);
-        game.physics.arcade.overlap(this.player, this.birds, this.killBird, null, this);
+
+        if (cat.state >= cat.STATES.stand) {
+            game.physics.arcade.overlap(this.player, this.birds, this.killBird, null, this);
+        }
 
         this.checkSpawnBird(now);
         this.checkObedience(now);
