@@ -7,7 +7,7 @@ var mainState = {
         game.load.image('test_cat', 'assets/sprites/test_cat.png');
 
         // tilesets
-        game.load.tilemap('tilemap', 'assets/test_map2.json', null, Phaser.Tilemap.TILED_JSON);
+        game.load.tilemap('tilemap', 'assets/test_map3.json', null, Phaser.Tilemap.TILED_JSON);
         game.load.image('tiles', 'assets/sprites/tileset.png');
         game.load.spritesheet('cat', 'assets/sprites/cat.png', 16, 16);
 
@@ -22,7 +22,7 @@ var mainState = {
     create: function() {
         // Here we create the game
         // Set the background color to blue
-        game.stage.backgroundColor = '#49a';
+        game.stage.backgroundColor = '#a2fff3';
 
         // Start the Arcade physics system (for movements and collisions)
         game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -30,8 +30,9 @@ var mainState = {
         this.map = game.add.tilemap('tilemap');
         this.map.addTilesetImage('test_tileset', 'tiles');
 
+        this.backgroundLayer1 = this.map.createLayer('Background1');
+        this.backgroundLayer2 = this.map.createLayer('Background2');
         this.collisionLayer = this.map.createLayer('Collision');
-        this.backgroundLayer = this.map.createLayer('Background');
 
         //Before you can use the collide function you need to set what tiles can collide
         this.map.setCollisionBetween(1, 100, true, 'Collision');
@@ -47,8 +48,8 @@ var mainState = {
             'right': Phaser.KeyCode.RIGHT,
             'jump': Phaser.KeyCode.SPACEBAR
         });
-        // Create the player in the middle of the game
-        this.player = game.add.sprite(70, 100, 'cat', 5);
+
+        this.player = game.add.sprite(70, 32, 'cat', 5);
         this.player.animations.add(cat.STATES.sleep, [0, 1, 2, 3, 4]);
         this.player.animations.add(cat.STATES.lay, [5, 6, 7, 8, 9]);
         this.player.animations.add(cat.STATES.sit, [10, 11, 12, 13, 14]);
