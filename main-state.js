@@ -10,6 +10,8 @@ var mainState = {
         game.load.tilemap('tilemap', 'assets/test_map2.json', null, Phaser.Tilemap.TILED_JSON);
         game.load.image('tiles', 'assets/sprites/tileset.png');
         game.load.spritesheet('cat', 'assets/sprites/cat.png', 16, 16);
+        game.load.spritesheet('bird', 'assets/sprites/bird.png', 16, 16);
+        game.load.spritesheet('coin', 'assets/sprites/coin.png', 20, 20);
 
         // game scaling
         game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
@@ -58,10 +60,9 @@ var mainState = {
         this.player.animations.add(cat.STATES.jump, [30, 31, 32, 33, 34]);
         this.player.anchor.setTo(.5,.5);
 
-        game.physics.arcade.enable(this.player);
+        this.birds = game.add.group();
 
-        //this.player.smoothed = false;
-        //this.player.scale.set(4);
+        game.physics.arcade.enable(this.player);
 
         // camera
         game.camera.follow(this.player, Phaser.Camera.FOLLOW_LOCKON, 0.1, 0.1);
@@ -84,54 +85,26 @@ var mainState = {
         this.lastObedient = null;
         this.lastObedientCheck = null;
         this.lastKeyCheck = null;
+        this.lastBirdSpawn = null;
     },
 
     update: function() {
 
         // Here we update the game 60 times per second
         var now = Date.now();
-        this.lastObedient = this.lastObedient || now;
-        this.lastObedientCheck = this.lastObedientCheck || now;
-        this.lastKeyCheck = this.lastKeyCheck || now;
-
-        if (now - this.lastObedientCheck > 1000 && !window.CAT_TREATS) {
-            this.lastObedientCheck = now;
-            if (!cat.obedient) {
-                cat.obedient = Math.random() > 0.5;
-                this.lastObedient = (cat.obedient * now) || this.lastObedient;
-            } else {
-                cat.obedient = !(now - this.lastObedient > 5000);
-            }
-
-            if (!cat.obedient) {
-                cat.state = cat.random();
-                // Disobedient cat presses random keys
-                _.each(_.keys(this.keyCheck), (key) => {
-                    this.keyCheck[key] = Math.random() > 0.5;
-                });
-                cat.machine(this.keyCheck);
-                console.log('cat state', cat.state);
-            }
-        }
 
         game.physics.arcade.collide(this.player, this.collisionLayer);
+        game.physics.arcade.collide(this.birds, this.collisionLayer);
+        game.physics.arcade.overlap(this.player, this.birds, this.killBird, null, this);
 
-        if (cat.obedient || window.CAT_TREATS) {
-            this.keyCheck = {
-                up: this.cursor.up.isDown,
-                down: this.cursor.down.isDown,
-                left: this.cursor.left.isDown,
-                right: this.cursor.right.isDown,
-                space: this.cursor.jump.isDown
-            };
+        this.checkSpawnBird(now);
+        this.checkObedience(now);
+        this.checkKeys(now);
 
-            // short delay between state swaps
-            if (now - this.lastKeyCheck > 100) {
-                this.lastKeyCheck = now;
-                cat.machine(this.keyCheck);
-            }
-        }
+        this.moveCat(now);
+    },
 
+    moveCat() {
         var willFace = this.facing;
 
         this.player.body.velocity.x = 0;
@@ -145,11 +118,11 @@ var mainState = {
             if (this.keyCheck.left) {
                 willFace = -1;
                 this.player.body.velocity.x = -100;
-                cat.state === cat.STATES.move;
+                cat.state = cat.STATES.move;
             } else if (this.keyCheck.right) {
                 willFace = 1;
                 this.player.body.velocity.x = 100;
-                cat.state === cat.STATES.move;
+                cat.state = cat.STATES.move;
             } else {
                 this.player.body.velocity.x = 0;
                 cat.state = cat.STATES.stand;
@@ -168,5 +141,103 @@ var mainState = {
             this.facing = willFace;
         }
         this.player.animations.play(cat.state, cat.state + 1, true);
+    },
+
+    checkObedience(now) {
+        this.lastObedient = this.lastObedient || now;
+        this.lastObedientCheck = this.lastObedientCheck || now;
+
+        // Check if cat is going to be obedient
+        if (now - this.lastObedientCheck > 1000 && !window.CAT_TREATS) {
+            this.lastObedientCheck = now;
+            if (!cat.obedient) {
+                // Flip a coin to see if cat will become obedient
+                cat.obedient = Math.random() > 0.5;
+                this.lastObedient = (cat.obedient * now) || this.lastObedient;
+            } else {
+                // Cat will stay obedient for at least a few seconds
+                cat.obedient = !(now - this.lastObedient > 5000);
+            }
+
+            if (!cat.obedient) {
+                cat.state = cat.random();
+                // Disobedient cat presses random keys
+                _.each(_.keys(this.keyCheck), (key) => {
+                    this.keyCheck[key] = Math.random() > 0.5;
+                });
+                cat.machine(this.keyCheck);
+                console.log('cat state', cat.state);
+            }
+        }
+    },
+
+    checkKeys(now) {
+        this.lastKeyCheck = this.lastKeyCheck || now;
+
+        if (cat.obedient || window.CAT_TREATS) {
+            this.keyCheck = {
+                up: this.cursor.up.isDown,
+                down: this.cursor.down.isDown,
+                left: this.cursor.left.isDown,
+                right: this.cursor.right.isDown,
+                space: this.cursor.jump.isDown
+            };
+
+            // short delay between state swaps
+            if (now - this.lastKeyCheck > 100) {
+                this.lastKeyCheck = now;
+                cat.machine(this.keyCheck);
+            }
+        }
+    },
+
+    checkSpawnBird(now) {
+        this.lastBirdSpawn = this.lastBirdSpawn || now;
+
+        if (now - this.lastBirdSpawn > 5000) {
+            var willSpawn = Math.random() > 0.5;
+            if (willSpawn) {
+                var dirX = Math.random > 0.5 ? -1 : 1;
+                var randX = Math.floor(Math.random() * 30) + 10;
+                var randY = Math.floor(Math.random() * 30) + 10;
+                this.spawnBird(this.player,
+                    this.player.x + (randX * dirX),
+                    this.player.y + randY);
+            }
+
+            this.lastBirdSpawn = now;
+        }
+    },
+
+    spawnBird(player, x, y) {
+        var deltaX = player.x - x;
+        var deltaY = player.y - y;
+        var spawnX = x - (deltaX * 20);
+        var spawnY = y - deltaY + 100;
+        var bird = game.add.sprite(spawnX, spawnY, 'bird', 0);
+        bird.animations.add('fly', [0, 1]);
+        bird.animations.add('rest', [2, 3]);
+        bird.animations.add('dead', [4]);
+        bird.anchor.setTo(.5,.5);
+
+        this.birds.add(bird);
+        bird.animations.play('fly', 8, true);
+
+        bird.scale.x *= Math.sign(x - spawnX);
+
+        var tween = game.add.tween(bird).to({x: x, y: y},
+            2400, Phaser.Easing.Linear.In, true, 0, 0);
+        tween.onComplete.addOnce(() => {
+            game.physics.arcade.enable(bird);
+            bird.body.gravity.y = 100;
+            bird.animations.play('rest', 1, true);
+        });
+        return bird;
+    },
+
+    killBird(player, bird) {
+        bird.animations.play('dead', 1, true);
+        bird.animations.stop();
+        bird.body.gravity.y = 600;
     }
 };
