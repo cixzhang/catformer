@@ -25,7 +25,7 @@ var mainState = {
     create: function() {
         // Here we create the game
         // Set the background color to blue
-        game.stage.backgroundColor = '#a2fff3';
+        game.stage.backgroundColor = '#A9DBD8';
 
         // Start the Arcade physics system (for movements and collisions)
         game.physics.startSystem(Phaser.Physics.ARCADE);
