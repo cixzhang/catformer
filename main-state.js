@@ -259,7 +259,7 @@ var mainState = {
         }
 
         if (!this.birdseed.ready && this.birdseed.body.blocked.down) {
-            this.spawnBird(this.player, this.birdseed.x, this.birdseed.y + 2);
+            this.spawnBird(this.player, this.birdseed.x, this.birdseed.y + 8);
             this.birdseed.ready = true;
         }
     },
