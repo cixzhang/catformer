@@ -12,7 +12,7 @@ var mainState = {
         game.load.image('tiles', 'assets/sprites/tileset.png');
         game.load.spritesheet('cat', 'assets/sprites/cat.png', 16, 16);
         game.load.spritesheet('bird', 'assets/sprites/bird.png', 16, 16);
-        game.load.spritesheet('coin', 'assets/sprites/coin.png', 20, 20);
+        game.load.spritesheet('bowls', 'assets/sprites/bowls.png', 16, 16);
         game.load.image('title', 'assets/sprites/title.png');
 
         // game scaling
@@ -73,6 +73,8 @@ var mainState = {
         // Make a sprite a bit higher than player for the camera to follow
         // in the start screen.
         this.fairy = game.add.sprite(170, 80);
+        this.water = game.add.sprite(32, 190, 'bowls', 0);
+        this.food = game.add.sprite(48, 190, 'bowls', 1);
 
         this.birdseed = game.add.sprite(0, 0, 'bird', 5);
         this.birdseed.ready = true;
@@ -85,6 +87,8 @@ var mainState = {
 
         game.physics.arcade.enable(this.player);
         game.physics.arcade.enable(this.birdseed);
+        game.physics.arcade.enable(this.water);
+        game.physics.arcade.enable(this.food);
 
         // camera
         game.camera.setPosition(0, 60);
@@ -93,6 +97,8 @@ var mainState = {
         // Add gravity to make it fall
         this.player.body.gravity.y = 600;
         this.birdseed.body.gravity.y = 600;
+        this.water.body.gravity.y = 600;
+        this.food.body.gravity.y = 600;
 
         // Keep track of keys pressed
         this.keyCheck = {
@@ -120,6 +126,10 @@ var mainState = {
         game.physics.arcade.collide(this.player, this.collisionLayer);
         game.physics.arcade.collide(this.birds, this.collisionLayer);
         game.physics.arcade.collide(this.birdseed, this.collisionLayer);
+        game.physics.arcade.collide(this.food, this.collisionLayer);
+        game.physics.arcade.collide(this.water, this.collisionLayer);
+        game.physics.arcade.collide(this.food, this.trapLayer);
+        game.physics.arcade.collide(this.water, this.trapLayer);
         game.physics.arcade.collide(this.player, this.trapLayer, this.hideTrap, null, this);
 
         if (cat.state >= cat.STATES.stand) {
@@ -142,8 +152,14 @@ var mainState = {
                 this.state = 'play';
             }
         }
-        
-        
+
+        if (!this.food.body.blocked.down) {
+            this.food.angle += 4;
+        }
+
+        if (!this.water.body.blocked.down) {
+            this.water.angle -= 4;
+        }
     },
 
     moveCat() {
@@ -301,6 +317,7 @@ var mainState = {
     },
 
     hideTrap() {
+        if (this.ready) return;
         // TODO: start music here
         this.map.setCollisionBetween(1, 100, false, 'Trap');
         this.trapLayer.visible = false;
@@ -308,6 +325,11 @@ var mainState = {
         this.camera.shake(0.01, 500);
         this.camera.follow(this.player, Phaser.Camera.FOLLOW_PLATFORMER, 0.1, 0.1);
         this.ready = true;
+
+        game.add.tween(this.food).to({ alpha: 0 },
+            1000, Phaser.Easing.Linear.In, true, 0, 0);
+        game.add.tween(this.water).to({ alpha: 0 },
+            1000, Phaser.Easing.Linear.In, true, 0, 0);
 
         // prevent cat from auto-jumping away from trap
         setTimeout(() => {
