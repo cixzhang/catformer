@@ -74,13 +74,17 @@ var mainState = {
         // in the start screen.
         this.fairy = game.add.sprite(170, 80);
 
+        this.birdseed = game.add.sprite(0, 0, 'bird', 5);
+        this.birdseed.ready = true;
+
         this.birds = game.add.group();
-        
+
         this.title = game.add.sprite(32, 64, 'title');
         this.title.alpha = 0;
         game.add.tween(this.title).to( { alpha: 1 }, 2000, Phaser.Easing.Linear.None, true, 0);
 
         game.physics.arcade.enable(this.player);
+        game.physics.arcade.enable(this.birdseed);
 
         // camera
         game.camera.setPosition(0, 60);
@@ -88,6 +92,7 @@ var mainState = {
 
         // Add gravity to make it fall
         this.player.body.gravity.y = 600;
+        this.birdseed.body.gravity.y = 600;
 
         // Keep track of keys pressed
         this.keyCheck = {
@@ -114,6 +119,7 @@ var mainState = {
 
         game.physics.arcade.collide(this.player, this.collisionLayer);
         game.physics.arcade.collide(this.birds, this.collisionLayer);
+        game.physics.arcade.collide(this.birdseed, this.collisionLayer);
         game.physics.arcade.collide(this.player, this.trapLayer, this.hideTrap, null, this);
 
         if (cat.state >= cat.STATES.stand) {
@@ -177,6 +183,11 @@ var mainState = {
             this.facing = willFace;
         }
         this.player.animations.play(cat.state, cat.state + 1, true);
+
+        if (!this.ready) {
+            this.fairy.x = this.player.x;
+            this.fairy.y = this.player.y - 100;
+        }
     },
 
     checkObedience(now) {
@@ -230,18 +241,26 @@ var mainState = {
         if (!this.ready) return;
         this.lastBirdSpawn = this.lastBirdSpawn || now;
 
-        if (now - this.lastBirdSpawn > 5000) {
-            var willSpawn = Math.random() > 0.5;
-            if (willSpawn) {
-                var dirX = Math.random > 0.5 ? -1 : 1;
-                var randX = Math.floor(Math.random() * 30) + 10;
-                var randY = Math.floor(Math.random() * 30) + 10;
-                this.spawnBird(this.player,
-                    this.player.x + (randX * dirX),
-                    this.player.y + randY);
-            }
+        if (this.birdseed.ready) {
+            this.birdseed.x = 0;
+            this.birdseed.y = 0;
+        }
 
-            this.lastBirdSpawn = now;
+        if (now - this.lastBirdSpawn > 5000) {
+            if (this.birdseed.ready) {
+                var dirX = Math.random() > 0.5 ? -1 : 1;
+                var randX = Math.floor(Math.random() * 80) + 50;
+
+                this.birdseed.x = this.player.x + (randX * dirX);
+                this.birdseed.y = this.player.y - 200;
+                this.birdseed.ready = false;
+                this.lastBirdSpawn = now;
+            }
+        }
+
+        if (!this.birdseed.ready && this.birdseed.body.blocked.down) {
+            this.spawnBird(this.player, this.birdseed.x, this.birdseed.y + 2);
+            this.birdseed.ready = true;
         }
     },
 
@@ -262,7 +281,7 @@ var mainState = {
         bird.scale.x *= Math.sign(x - spawnX);
 
         var tween = game.add.tween(bird).to({x: x, y: y},
-            3000, Phaser.Easing.Linear.In, true, 0, 0);
+            8000, Phaser.Easing.Linear.In, true, 0, 0);
         tween.onComplete.addOnce(() => {
             game.physics.arcade.enable(bird);
             bird.body.gravity.y = 100;
