@@ -240,9 +240,12 @@ var mainState = {
     },
 
     killBird(player, bird) {
+        if (bird.dead) return;
+        bird.dead = true;
         bird.animations.play('dead', 1, true);
         bird.animations.stop();
-        bird.y -= 1;
+        bird.y -= 3;
         bird.body.gravity.y = 600;
+        cat.obedient = false;
     }
 };
