@@ -23,6 +23,9 @@ var mainState = {
     },
 
     create: function() {
+        // basic state control
+        this.state = 'start';
+
         // Here we create the game
         // Set the background color to blue
         game.stage.backgroundColor = '#a2fff3';
@@ -56,7 +59,7 @@ var mainState = {
             'jump': Phaser.KeyCode.SPACEBAR
         });
 
-        this.player = game.add.sprite(150, 100, 'cat', 10);
+        this.player = game.add.sprite(150, 192, 'cat', 10);
         this.player.animations.add(cat.STATES.sleep, [0, 1, 2, 3, 4]);
         this.player.animations.add(cat.STATES.lay, [5, 6, 7, 8, 9]);
         this.player.animations.add(cat.STATES.sit, [10, 11, 12, 13, 14]);
@@ -68,9 +71,20 @@ var mainState = {
 
         this.birds = game.add.group();
 
+        // TODO: add title box sprite
+        /*
+        this.title = game.add.sprite(100, 100, 'coin');
+        this.title.text = game.add.text(100, 555, "000000", {
+            font: "25px Unibody-reg",
+            fill: "#ffffff",
+            align: "left"
+        });
+        */
+
         game.physics.arcade.enable(this.player);
 
         // camera
+        game.camera.setPosition(0, 60);
         game.camera.follow(this.player, Phaser.Camera.FOLLOW_PLATFORMER, 0.1, 0.1);
 
         // Add gravity to make it fall
@@ -107,11 +121,26 @@ var mainState = {
             game.physics.arcade.overlap(this.player, this.birds, this.killBird, null, this);
         }
 
-        this.checkSpawnBird(now);
-        this.checkObedience(now);
-        this.checkKeys(now);
+        // only do these things while we are playing
+        if (this.state === 'play') {
+            this.checkSpawnBird(now);
+            this.checkObedience(now);
 
-        this.moveCat(now);
+            this.checkKeys(now);
+            this.moveCat(now);
+        }
+        else {
+            //cat.obedient = true;
+            this.player.animations.play(cat.STATES.sit, cat.STATES.sit + 1, true);
+            // TODO: print some text
+            // this.title.text.setText("test");
+            this.checkKeys(now);
+            if (this.keyCheck.up) {
+                this.state = 'play';
+            }
+        }
+        
+        
     },
 
     moveCat() {
@@ -256,10 +285,17 @@ var mainState = {
     },
 
     hideTrap() {
+        // TODO: start music here
         this.map.setCollisionBetween(1, 100, false, 'Trap');
         this.trapLayer.visible = false;
         this.startLayer.visible = false;
         this.ready = true;
-        CAT_TREATS = false;
+
+        // prevent cat from auto-jumping away from trap
+        setTimeout(() => {
+            CAT_TREATS = false;
+            cat.obedient = false;
+        }, 10);
+        
     }
 };
