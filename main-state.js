@@ -282,6 +282,7 @@ var mainState = {
         this.map.setCollisionBetween(1, 100, false, 'Trap');
         this.trapLayer.visible = false;
         this.startLayer.visible = false;
+        this.camera.shake(0.01, 500);
         this.ready = true;
 
         // prevent cat from auto-jumping away from trap
