@@ -51,7 +51,7 @@ var mainState = {
             'jump': Phaser.KeyCode.SPACEBAR
         });
 
-        this.player = game.add.sprite(70, 32, 'cat', 5);
+        this.player = game.add.sprite(150, 100, 'cat', 10);
         this.player.animations.add(cat.STATES.sleep, [0, 1, 2, 3, 4]);
         this.player.animations.add(cat.STATES.lay, [5, 6, 7, 8, 9]);
         this.player.animations.add(cat.STATES.sit, [10, 11, 12, 13, 14]);
@@ -66,7 +66,7 @@ var mainState = {
         game.physics.arcade.enable(this.player);
 
         // camera
-        game.camera.follow(this.player, Phaser.Camera.FOLLOW_LOCKON, 0.1, 0.1);
+        game.camera.follow(this.player, Phaser.Camera.FOLLOW_PLATFORMER, 0.1, 0.1);
 
         // Add gravity to make it fall
         this.player.body.gravity.y = 600;
@@ -230,7 +230,7 @@ var mainState = {
         bird.scale.x *= Math.sign(x - spawnX);
 
         var tween = game.add.tween(bird).to({x: x, y: y},
-            2400, Phaser.Easing.Linear.In, true, 0, 0);
+            3000, Phaser.Easing.Linear.In, true, 0, 0);
         tween.onComplete.addOnce(() => {
             game.physics.arcade.enable(bird);
             bird.body.gravity.y = 100;
@@ -242,6 +242,7 @@ var mainState = {
     killBird(player, bird) {
         bird.animations.play('dead', 1, true);
         bird.animations.stop();
+        bird.y -= 1;
         bird.body.gravity.y = 600;
     }
 };
