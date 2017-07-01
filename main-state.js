@@ -13,6 +13,7 @@ var mainState = {
         game.load.spritesheet('cat', 'assets/sprites/cat.png', 16, 16);
         game.load.spritesheet('bird', 'assets/sprites/bird.png', 16, 16);
         game.load.spritesheet('coin', 'assets/sprites/coin.png', 20, 20);
+        game.load.image('title', 'assets/sprites/title.png');
 
         // game scaling
         game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
@@ -23,6 +24,9 @@ var mainState = {
     },
 
     create: function() {
+        // basic state control
+        this.state = 'start';
+
         // Here we create the game
         // Set the background color to blue
         game.stage.backgroundColor = '#A9DBD8';
@@ -41,7 +45,7 @@ var mainState = {
         this.startLayer = this.map.createLayer('Start');
 
         //Before you can use the collide function you need to set what tiles can collide
-        this.map.setCollisionBetween(1, 100, true, 'Collision');
+        this.map.setCollisionBetween(1, 200, true, 'Collision');
         this.map.setCollisionBetween(1, 100, true, 'Trap');
 
         // sets the size of the game world, doesn't affect the canvas...
@@ -56,7 +60,7 @@ var mainState = {
             'jump': Phaser.KeyCode.SPACEBAR
         });
 
-        this.player = game.add.sprite(150, 100, 'cat', 10);
+        this.player = game.add.sprite(150, 192, 'cat', 10);
         this.player.animations.add(cat.STATES.sleep, [0, 1, 2, 3, 4]);
         this.player.animations.add(cat.STATES.lay, [5, 6, 7, 8, 9]);
         this.player.animations.add(cat.STATES.sit, [10, 11, 12, 13, 14]);
@@ -67,10 +71,15 @@ var mainState = {
         this.player.anchor.setTo(.5,.5);
 
         this.birds = game.add.group();
+        
+        this.title = game.add.sprite(32, 64, 'title');
+        this.title.alpha = 0;
+        game.add.tween(this.title).to( { alpha: 1 }, 2000, Phaser.Easing.Linear.None, true, 0);
 
         game.physics.arcade.enable(this.player);
 
         // camera
+        game.camera.setPosition(0, 60);
         game.camera.follow(this.player, Phaser.Camera.FOLLOW_PLATFORMER, 0.1, 0.1);
 
         // Add gravity to make it fall
@@ -107,11 +116,24 @@ var mainState = {
             game.physics.arcade.overlap(this.player, this.birds, this.killBird, null, this);
         }
 
-        this.checkSpawnBird(now);
-        this.checkObedience(now);
-        this.checkKeys(now);
+        // only do these things while we are playing
+        if (this.state === 'play') {
+            this.checkSpawnBird(now);
+            this.checkObedience(now);
 
-        this.moveCat(now);
+            this.checkKeys(now);
+            this.moveCat(now);
+        }
+        else {
+            this.player.animations.play(cat.STATES.sit, cat.STATES.sit + 1, true);
+            this.checkKeys(now);
+            if (this.keyCheck.up) {
+                game.add.tween(this.title).to( { alpha: 0 }, 500, Phaser.Easing.Linear.None, true, 0);
+                this.state = 'play';
+            }
+        }
+        
+        
     },
 
     moveCat() {
@@ -256,10 +278,17 @@ var mainState = {
     },
 
     hideTrap() {
+        // TODO: start music here
         this.map.setCollisionBetween(1, 100, false, 'Trap');
         this.trapLayer.visible = false;
         this.startLayer.visible = false;
         this.ready = true;
-        CAT_TREATS = false;
+
+        // prevent cat from auto-jumping away from trap
+        setTimeout(() => {
+            CAT_TREATS = false;
+            cat.obedient = false;
+        }, 10);
+        
     }
 };
