@@ -70,6 +70,10 @@ var mainState = {
         this.player.animations.add(cat.STATES.jump, [30, 31, 32, 33, 34]);
         this.player.anchor.setTo(.5,.5);
 
+        // Make a sprite a bit higher than player for the camera to follow
+        // in the start screen.
+        this.fairy = game.add.sprite(170, 80);
+
         this.birds = game.add.group();
         
         this.title = game.add.sprite(32, 64, 'title');
@@ -80,7 +84,7 @@ var mainState = {
 
         // camera
         game.camera.setPosition(0, 60);
-        game.camera.follow(this.player, Phaser.Camera.FOLLOW_PLATFORMER, 0.1, 0.1);
+        game.camera.follow(this.fairy, Phaser.Camera.FOLLOW_PLATFORMER, 0.1, 0.1);
 
         // Add gravity to make it fall
         this.player.body.gravity.y = 600;
@@ -283,6 +287,7 @@ var mainState = {
         this.trapLayer.visible = false;
         this.startLayer.visible = false;
         this.camera.shake(0.01, 500);
+        this.camera.follow(this.player, Phaser.Camera.FOLLOW_PLATFORMER, 0.1, 0.1);
         this.ready = true;
 
         // prevent cat from auto-jumping away from trap
