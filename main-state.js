@@ -1,6 +1,7 @@
 /* globals Phaser _ game cat */
 /* eslint no-console: 0 */
 
+window.CAT_TREATS = true;
 var mainState = {
     preload: function() {
         // Here we preload the assets
@@ -29,15 +30,19 @@ var mainState = {
         // Start the Arcade physics system (for movements and collisions)
         game.physics.startSystem(Phaser.Physics.ARCADE);
 
+        this.ready = false;
         this.map = game.add.tilemap('tilemap');
         this.map.addTilesetImage('test_tileset', 'tiles');
 
         this.backgroundLayer1 = this.map.createLayer('Background1');
         this.backgroundLayer2 = this.map.createLayer('Background2');
         this.collisionLayer = this.map.createLayer('Collision');
+        this.trapLayer = this.map.createLayer('Trap');
+        this.startLayer = this.map.createLayer('Start');
 
         //Before you can use the collide function you need to set what tiles can collide
         this.map.setCollisionBetween(1, 100, true, 'Collision');
+        this.map.setCollisionBetween(1, 100, true, 'Trap');
 
         // sets the size of the game world, doesn't affect the canvas...
         this.collisionLayer.resizeWorld();
@@ -96,6 +101,7 @@ var mainState = {
 
         game.physics.arcade.collide(this.player, this.collisionLayer);
         game.physics.arcade.collide(this.birds, this.collisionLayer);
+        game.physics.arcade.collide(this.player, this.trapLayer, this.hideTrap, null, this);
 
         if (cat.state >= cat.STATES.stand) {
             game.physics.arcade.overlap(this.player, this.birds, this.killBird, null, this);
@@ -170,7 +176,6 @@ var mainState = {
                     this.keyCheck[key] = Math.random() > 0.5;
                 });
                 cat.machine(this.keyCheck);
-                console.log('cat state', cat.state);
             }
         }
     },
@@ -196,6 +201,7 @@ var mainState = {
     },
 
     checkSpawnBird(now) {
+        if (!this.ready) return;
         this.lastBirdSpawn = this.lastBirdSpawn || now;
 
         if (now - this.lastBirdSpawn > 5000) {
@@ -247,5 +253,13 @@ var mainState = {
         bird.y -= 3;
         bird.body.gravity.y = 600;
         cat.obedient = false;
+    },
+
+    hideTrap() {
+        this.map.setCollisionBetween(1, 100, false, 'Trap');
+        this.trapLayer.visible = false;
+        this.startLayer.visible = false;
+        this.ready = true;
+        CAT_TREATS = false;
     }
 };
