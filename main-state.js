@@ -41,7 +41,7 @@ var mainState = {
         this.startLayer = this.map.createLayer('Start');
 
         //Before you can use the collide function you need to set what tiles can collide
-        this.map.setCollisionBetween(1, 100, true, 'Collision');
+        this.map.setCollisionBetween(1, 200, true, 'Collision');
         this.map.setCollisionBetween(1, 100, true, 'Trap');
 
         // sets the size of the game world, doesn't affect the canvas...
