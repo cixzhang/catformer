@@ -13,6 +13,7 @@ var mainState = {
         game.load.spritesheet('cat', 'assets/sprites/cat.png', 16, 16);
         game.load.spritesheet('bird', 'assets/sprites/bird.png', 16, 16);
         game.load.spritesheet('coin', 'assets/sprites/coin.png', 20, 20);
+        game.load.image('title', 'assets/sprites/title.png');
 
         // game scaling
         game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
@@ -70,16 +71,10 @@ var mainState = {
         this.player.anchor.setTo(.5,.5);
 
         this.birds = game.add.group();
-
-        // TODO: add title box sprite
-        /*
-        this.title = game.add.sprite(100, 100, 'coin');
-        this.title.text = game.add.text(100, 555, "000000", {
-            font: "25px Unibody-reg",
-            fill: "#ffffff",
-            align: "left"
-        });
-        */
+        
+        this.title = game.add.sprite(32, 64, 'title');
+        this.title.alpha = 0;
+        game.add.tween(this.title).to( { alpha: 1 }, 2000, Phaser.Easing.Linear.None, true, 0);
 
         game.physics.arcade.enable(this.player);
 
@@ -130,12 +125,10 @@ var mainState = {
             this.moveCat(now);
         }
         else {
-            //cat.obedient = true;
             this.player.animations.play(cat.STATES.sit, cat.STATES.sit + 1, true);
-            // TODO: print some text
-            // this.title.text.setText("test");
             this.checkKeys(now);
             if (this.keyCheck.up) {
+                game.add.tween(this.title).to( { alpha: 0 }, 500, Phaser.Easing.Linear.None, true, 0);
                 this.state = 'play';
             }
         }
