@@ -19,6 +19,8 @@ var mainState = {
 
         // sounds
         game.load.audio('mainTheme', 'assets/sound/meowschief.ogg');
+        game.load.audio('earthquake', 'assets/sfx/earthquake.wav');
+        game.load.audio('jump', 'assets/sfx/jump.wav');
 
         // game scaling
         game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
@@ -130,6 +132,10 @@ var mainState = {
 
         this.facing = -1;
 
+        // SFX
+        this.earthquake = game.add.audio('earthquake');
+        this.jump = game.add.audio('jump');
+
         // Timers
         this.lastObedient = null;
         this.lastObedientCheck = null;
@@ -189,7 +195,7 @@ var mainState = {
             // Make the player jump if he is touching the ground
             if (this.keyCheck.space && this.player.body.blocked.down) {
                 this.player.body.velocity.y = -250;
-                cat.state = cat.STATES.stand;
+                this.jump.play();
             }
 
             if (this.keyCheck.left) {
@@ -351,6 +357,8 @@ var mainState = {
             1000, Phaser.Easing.Linear.In, true, 0, 0);
         game.add.tween(this.indicator).to({y: this.indicator.y - 5},
             2000, Phaser.Easing.Linear.None, true, 0, 0).loop(true);
+
+        this.earthquake.play();
 
         // prevent cat from auto-jumping away from trap
         setTimeout(() => {
