@@ -113,6 +113,7 @@ var mainState = {
         this.mainTheme = game.add.audio('mainTheme');
         this.mainTheme.volume = 0.05;
         this.earthquake = game.add.audio('earthquake');
+        this.earthquake.volume = 0.5;
         this.jump = game.add.audio('jump');
         this.chirp = game.add.audio('chirp');
 
