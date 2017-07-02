@@ -20,8 +20,11 @@ var mainState = {
         // sounds
         game.load.audio('mainTheme', 'assets/sound/meowschief.ogg');
         game.load.audio('earthquake', 'assets/sound/earthquake.wav');
-        game.load.audio('jump', 'assets/sound/jump.wav');
+        game.load.audio('jump', 'assets/sound/jump2.wav');
         game.load.audio('chirp', 'assets/sound/chirp.wav');
+        game.load.audio('meow1', 'assets/sound/meow1.wav');
+        game.load.audio('meow2', 'assets/sound/meow2.wav');
+        game.load.audio('purr', 'assets/sound/purr.wav');
 
         // game scaling
         game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
@@ -111,11 +114,12 @@ var mainState = {
 
         // sound
         this.mainTheme = game.add.audio('mainTheme');
-        this.mainTheme.volume = 0.05;
         this.earthquake = game.add.audio('earthquake');
-        this.earthquake.volume = 0.5;
         this.jump = game.add.audio('jump');
         this.chirp = game.add.audio('chirp');
+        this.meow1 = game.add.audio('meow1');
+        this.meow2 = game.add.audio('meow2');
+        this.purr = game.add.audio('purr');
 
         // camera
         game.camera.setPosition(0, 60);
@@ -143,7 +147,7 @@ var mainState = {
         this.lastObedientCheck = null;
         this.lastKeyCheck = null;
         this.lastBirdSpawn = null;
-
+        this.timeStartDisobedience = null;
         this.win = false;
     },
 
@@ -165,6 +169,12 @@ var mainState = {
             game.physics.arcade.overlap(this.player, this.birds, this.killBird, null, this);
         }
 
+        this.lastCatState = cat.state;
+
+        if (cat.state == cat.STATES.sleep && !this.purr.isPlaying) {
+            this.purr.play();
+        }
+
         // only do these things while we are playing
         if (this.state === 'play') {
             this.checkSpawnBird(now);
@@ -180,6 +190,11 @@ var mainState = {
                 game.add.tween(this.title).to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, true, 0);
                 this.state = 'play';
             }
+        }
+
+        if (cat.state == cat.STATES.lay && this.lastCatState == cat.STATES.sleep) {
+            this.purr.stop();
+            this.meow2.play();
         }
 
         if (!this.food.body.blocked.down) {
@@ -238,6 +253,7 @@ var mainState = {
     checkObedience(now) {
         this.lastObedient = this.lastObedient || now;
         this.lastObedientCheck = this.lastObedientCheck || now;
+        console.log(this.timeStartDisobedience);
 
         // Check if cat is going to be obedient
         if (now - this.lastObedientCheck > 1000 && !window.CAT_TREATS) {
@@ -252,12 +268,21 @@ var mainState = {
             }
 
             if (!cat.obedient) {
+                this.timeStartDisobedience = this.timeStartDisobedience || now;
+                console.log(now - this.timeStartDisobedience);
+                if (now - this.timeStartDisobedience == 0) {
+                    this.meow1.play();
+                }
+
                 cat.state = cat.random();
                 // Disobedient cat presses random keys
                 _.each(_.keys(this.keyCheck), (key) => {
                     this.keyCheck[key] = Math.random() > 0.5;
                 });
                 cat.machine(this.keyCheck);
+            }
+            else {
+                this.timeStartDisobedience = 0;
             }
         }
     },
@@ -349,6 +374,11 @@ var mainState = {
 
     hideTrap() {
         if (this.ready) return;
+
+        // only break if player is over the middle
+        var deltaTrap = Math.abs(this.player.x - 64);
+        if (deltaTrap > 3) return;
+
         this.indicator.visible = true;
         this.map.setCollisionBetween(1, 100, false, 'Trap');
         this.trapLayer.visible = false;
@@ -384,7 +414,6 @@ var mainState = {
         if (!this.ready) return;
         if (cat.state !== cat.STATES.sleep) return;
         var deltaBed = Math.abs(this.player.x - this.bed.x);
-        console.log(deltaBed);
         if (!(deltaBed < 20 && deltaBed > 3)) return;
         if (this.win) return;
         this.handleWin();
