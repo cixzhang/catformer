@@ -13,6 +13,7 @@ var mainState = {
         game.load.spritesheet('cat', 'assets/sprites/cat.png', 16, 16);
         game.load.spritesheet('bird', 'assets/sprites/bird.png', 16, 16);
         game.load.spritesheet('bowls', 'assets/sprites/bowls.png', 16, 16);
+        game.load.spritesheet('bed', 'assets/sprites/bed.png', 16, 16);
         game.load.image('title', 'assets/sprites/title.png');
 
         // game scaling
@@ -60,6 +61,7 @@ var mainState = {
             'jump': Phaser.KeyCode.SPACEBAR
         });
 
+        this.bed = game.add.sprite(128, 176, 'bed', 0);
         this.player = game.add.sprite(150, 192, 'cat', 10);
         this.player.animations.add(cat.STATES.sleep, [0, 1, 2, 3, 4]);
         this.player.animations.add(cat.STATES.lay, [5, 6, 7, 8, 9]);
@@ -75,6 +77,7 @@ var mainState = {
         this.fairy = game.add.sprite(170, 80);
         this.water = game.add.sprite(32, 190, 'bowls', 0);
         this.food = game.add.sprite(48, 190, 'bowls', 1);
+        this.bedfront = game.add.sprite(128, 176, 'bed', 1);
 
         this.birdseed = game.add.sprite(0, 0, 'bird', 5);
         this.birdseed.ready = true;
@@ -89,6 +92,7 @@ var mainState = {
         game.physics.arcade.enable(this.birdseed);
         game.physics.arcade.enable(this.water);
         game.physics.arcade.enable(this.food);
+        game.physics.arcade.enable(this.bed);
 
         // camera
         game.camera.setPosition(0, 60);
@@ -119,7 +123,6 @@ var mainState = {
     },
 
     update: function() {
-
         // Here we update the game 60 times per second
         var now = Date.now();
 
@@ -131,6 +134,7 @@ var mainState = {
         game.physics.arcade.collide(this.food, this.trapLayer);
         game.physics.arcade.collide(this.water, this.trapLayer);
         game.physics.arcade.collide(this.player, this.trapLayer, this.hideTrap, null, this);
+        game.physics.arcade.overlap(this.player, this.bed, this.checkWin, null, this);
 
         if (cat.state >= cat.STATES.stand) {
             game.physics.arcade.overlap(this.player, this.birds, this.killBird, null, this);
@@ -202,7 +206,7 @@ var mainState = {
 
         if (!this.ready) {
             this.fairy.x = this.player.x;
-            this.fairy.y = this.player.y - 100;
+            this.fairy.y = this.player.y - 80;
         }
     },
 
@@ -336,6 +340,13 @@ var mainState = {
             CAT_TREATS = false;
             cat.obedient = false;
         }, 10);
-        
+    },
+
+    checkWin() {
+        if (!this.ready) return;
+        if (cat.state !== cat.STATES.sleep) return;
+        var deltaBed = Math.abs(this.player.x - this.bed.x);
+        if (!(deltaBed < 12 && deltaBed > 4)) return;
+        console.log('Win~', this.player.x, this.bed.x);
     }
 };
