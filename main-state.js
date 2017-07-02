@@ -111,6 +111,10 @@ var mainState = {
 
         // sound
         this.mainTheme = game.add.audio('mainTheme');
+        this.mainTheme.volume = 0.05;
+        this.earthquake = game.add.audio('earthquake');
+        this.jump = game.add.audio('jump');
+        this.chirp = game.add.audio('chirp');
 
         // camera
         game.camera.setPosition(0, 60);
@@ -132,11 +136,6 @@ var mainState = {
         };
 
         this.facing = -1;
-
-        // SFX
-        this.earthquake = game.add.audio('earthquake');
-        this.jump = game.add.audio('jump');
-        this.chirp = game.add.audio('chirp');
 
         // Timers
         this.lastObedient = null;
