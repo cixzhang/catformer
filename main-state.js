@@ -19,6 +19,7 @@ var mainState = {
 
         game.load.audio('earthquake', 'assets/sfx/earthquake.wav');
         game.load.audio('jump', 'assets/sfx/jump.wav');
+        game.load.audio('chirp', 'assets/sfx/chirp.wav');
 
         // game scaling
         game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
@@ -130,6 +131,7 @@ var mainState = {
         // SFX
         this.earthquake = game.add.audio('earthquake');
         this.jump = game.add.audio('jump');
+        this.chirp = game.add.audio('chirp');
 
         // Timers
         this.lastObedient = null;
@@ -322,12 +324,14 @@ var mainState = {
             game.physics.arcade.enable(bird);
             bird.body.gravity.y = 100;
             bird.animations.play('rest', 1, true);
+            this.chirp.play();
         });
         return bird;
     },
 
     killBird(player, bird) {
         if (bird.dead) return;
+        this.chirp.play();
         bird.dead = true;
         bird.animations.play('dead', 1, true);
         bird.animations.stop();
