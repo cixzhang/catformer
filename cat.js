@@ -64,7 +64,7 @@
     STATES: STATES,
     TRANSITIONS: TRANSITIONS,
     state: STATES.sit,
-    obedient: false
+    obedient: true
   };
 
   var cat = {

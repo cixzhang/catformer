@@ -264,7 +264,6 @@ var mainState = {
     checkObedience(now) {
         this.lastObedient = this.lastObedient || now;
         this.lastObedientCheck = this.lastObedientCheck || now;
-        console.log(this.timeStartDisobedience);
 
         // Check if cat is going to be obedient
         if (now - this.lastObedientCheck > 1000 && !window.CAT_TREATS) {
@@ -280,7 +279,6 @@ var mainState = {
 
             if (!cat.obedient) {
                 this.timeStartDisobedience = this.timeStartDisobedience || now;
-                console.log(now - this.timeStartDisobedience);
                 if (now - this.timeStartDisobedience == 0) {
                     this.meow1.play();
                 }
@@ -433,7 +431,10 @@ var mainState = {
     handleWin() {
         this.win = true;
         this.mainTheme.fadeOut(4000);
+        this.purr.fadeOut(4000);
+        this.meow1.volume = 0.0;
+        this.meow2.volume = 0.0;
         game.add.tween(this.black).to({ alpha: 1 }, 4000, Phaser.Easing.Linear.None, true, 0)
-            .onComplete.addOnce(() => { game.state.start('credit'); });
+            .onComplete.addOnce(() => { this.purr.stop(); game.state.start('credit'); });
     }
 };
