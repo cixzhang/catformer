@@ -15,6 +15,7 @@ var mainState = {
         game.load.spritesheet('bowls', 'assets/sprites/bowls.png', 16, 16);
         game.load.spritesheet('bed', 'assets/sprites/bed.png', 16, 16);
         game.load.spritesheet('down', 'assets/sprites/down.png', 16, 16);
+        game.load.spritesheet('black', 'assets/sprites/black.png', 1, 1);
         game.load.image('title', 'assets/sprites/title.png');
 
         // sounds
@@ -37,6 +38,9 @@ var mainState = {
     create: function() {
         // basic state control
         this.state = 'start';
+
+        // Reset the cat
+        cat.reset();
 
         // Here we create the game
         // Set the background color to blue
@@ -103,8 +107,15 @@ var mainState = {
 
         this.title = game.add.sprite(32, 64, 'title');
         this.title.alpha = 0;
-        game.add.tween(this.title).to({ alpha: 1 }, 500, Phaser.Easing.Linear.None, true, 0)
-            .onComplete.addOnce(() => { this.canPlay = true; });
+
+        this.black = game.add.sprite(0, 0, 'black', 0);
+        this.black.width = game.width * 5;
+        this.black.height = game.height * 5;
+        game.add.tween(this.black).to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, true, 800)
+            .onComplete.addOnce(() => {
+                game.add.tween(this.title).to({ alpha: 1 }, 500, Phaser.Easing.Linear.None, true, 0)
+                    .onComplete.addOnce(() => { this.canPlay = true; });
+            });
 
         game.physics.arcade.enable(this.player);
         game.physics.arcade.enable(this.birdseed);
@@ -421,5 +432,8 @@ var mainState = {
 
     handleWin() {
         this.win = true;
+        this.mainTheme.fadeOut(4000);
+        game.add.tween(this.black).to({ alpha: 1 }, 4000, Phaser.Easing.Linear.None, true, 0)
+            .onComplete.addOnce(() => { game.state.start('credit'); });
     }
 };
