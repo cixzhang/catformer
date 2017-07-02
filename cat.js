@@ -60,11 +60,14 @@
     }
   };
 
-  var cat = {
+  var initial = {
     STATES: STATES,
     TRANSITIONS: TRANSITIONS,
     state: STATES.sit,
-    obedient: false,
+    obedient: false
+  };
+
+  var cat = {
     random: () => {
       var index = 0;
       var transitions = TRANSITIONS[cat.state].list;
@@ -85,6 +88,9 @@
         }
         return false;
       });
+    },
+    reset: () => {
+      _.extend(cat, initial);
     }
   };
 
