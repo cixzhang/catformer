@@ -17,6 +17,8 @@ var mainState = {
         game.load.spritesheet('down', 'assets/sprites/down.png', 16, 16);
         game.load.image('title', 'assets/sprites/title.png');
 
+        // sounds
+        game.load.audio('mainTheme', 'assets/sound/meowschief.ogg');
         game.load.audio('earthquake', 'assets/sfx/earthquake.wav');
         game.load.audio('jump', 'assets/sfx/jump.wav');
         game.load.audio('chirp', 'assets/sfx/chirp.wav');
@@ -106,6 +108,9 @@ var mainState = {
         game.physics.arcade.enable(this.water);
         game.physics.arcade.enable(this.food);
         game.physics.arcade.enable(this.bed);
+
+        // sound
+        this.mainTheme = game.add.audio('mainTheme');
 
         // camera
         game.camera.setPosition(0, 60);
@@ -342,7 +347,6 @@ var mainState = {
 
     hideTrap() {
         if (this.ready) return;
-        // TODO: start music here
         this.indicator.visible = true;
         this.map.setCollisionBetween(1, 100, false, 'Trap');
         this.trapLayer.visible = false;
@@ -365,6 +369,13 @@ var mainState = {
             CAT_TREATS = false;
             cat.obedient = false;
         }, 10);
+
+        // set a timer to start the music
+        setTimeout(() => {
+            if (!this.mainTheme.isPlaying) {
+                this.mainTheme.loopFull();
+            }
+        }, 1700);
     },
 
     checkWin() {
