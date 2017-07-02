@@ -19,9 +19,9 @@ var mainState = {
 
         // sounds
         game.load.audio('mainTheme', 'assets/sound/meowschief.ogg');
-        game.load.audio('earthquake', 'assets/sfx/earthquake.wav');
-        game.load.audio('jump', 'assets/sfx/jump.wav');
-        game.load.audio('chirp', 'assets/sfx/chirp.wav');
+        game.load.audio('earthquake', 'assets/sound/earthquake.wav');
+        game.load.audio('jump', 'assets/sound/jump.wav');
+        game.load.audio('chirp', 'assets/sound/chirp.wav');
 
         // game scaling
         game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
