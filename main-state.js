@@ -17,6 +17,8 @@ var mainState = {
         game.load.spritesheet('down', 'assets/sprites/down.png', 16, 16);
         game.load.image('title', 'assets/sprites/title.png');
 
+        game.load.audio('earthquake', 'assets/sfx/earthquake.wav');
+
         // game scaling
         game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
         game.scale.setUserScale(3, 3);
@@ -346,6 +348,9 @@ var mainState = {
             1000, Phaser.Easing.Linear.In, true, 0, 0);
         game.add.tween(this.indicator).to({y: this.indicator.y - 5},
             2000, Phaser.Easing.Linear.None, true, 0, 0).loop(true);
+
+        var earthquake = game.add.audio('earthquake');
+        earthquake.play();
 
         // prevent cat from auto-jumping away from trap
         setTimeout(() => {
