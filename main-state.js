@@ -143,6 +143,8 @@ var mainState = {
         this.lastObedientCheck = null;
         this.lastKeyCheck = null;
         this.lastBirdSpawn = null;
+
+        this.win = false;
     },
 
     update: function() {
@@ -368,7 +370,7 @@ var mainState = {
         setTimeout(() => {
             CAT_TREATS = false;
             cat.obedient = false;
-        }, 10);
+        }, 25);
 
         // set a timer to start the music
         setTimeout(() => {
@@ -382,7 +384,13 @@ var mainState = {
         if (!this.ready) return;
         if (cat.state !== cat.STATES.sleep) return;
         var deltaBed = Math.abs(this.player.x - this.bed.x);
-        if (!(deltaBed < 12 && deltaBed > 4)) return;
-        console.log('Win~', this.player.x, this.bed.x);
+        console.log(deltaBed);
+        if (!(deltaBed < 20 && deltaBed > 3)) return;
+        if (this.win) return;
+        this.handleWin();
+    },
+
+    handleWin() {
+        this.win = true;
     }
 };
