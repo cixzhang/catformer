@@ -17,6 +17,9 @@ var mainState = {
         game.load.spritesheet('down', 'assets/sprites/down.png', 16, 16);
         game.load.image('title', 'assets/sprites/title.png');
 
+        // sounds
+        game.load.audio('mainTheme', 'assets/sound/meowschief.ogg');
+
         // game scaling
         game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
         game.scale.setUserScale(3, 3);
@@ -102,6 +105,9 @@ var mainState = {
         game.physics.arcade.enable(this.water);
         game.physics.arcade.enable(this.food);
         game.physics.arcade.enable(this.bed);
+
+        // sound
+        this.mainTheme = game.add.audio('mainTheme');
 
         // camera
         game.camera.setPosition(0, 60);
@@ -331,7 +337,6 @@ var mainState = {
 
     hideTrap() {
         if (this.ready) return;
-        // TODO: start music here
         this.indicator.visible = true;
         this.map.setCollisionBetween(1, 100, false, 'Trap');
         this.trapLayer.visible = false;
@@ -352,6 +357,13 @@ var mainState = {
             CAT_TREATS = false;
             cat.obedient = false;
         }, 10);
+
+        // set a timer to start the music
+        setTimeout(() => {
+            if (!this.mainTheme.isPlaying) {
+                this.mainTheme.loopFull();
+            }
+        }, 1700);
     },
 
     checkWin() {
