@@ -14,6 +14,7 @@ var mainState = {
         game.load.spritesheet('bird', 'assets/sprites/bird.png', 16, 16);
         game.load.spritesheet('bowls', 'assets/sprites/bowls.png', 16, 16);
         game.load.spritesheet('bed', 'assets/sprites/bed.png', 16, 16);
+        game.load.spritesheet('down', 'assets/sprites/down.png', 16, 16);
         game.load.image('title', 'assets/sprites/title.png');
 
         // game scaling
@@ -79,6 +80,13 @@ var mainState = {
         this.food = game.add.sprite(48, 190, 'bowls', 1);
         this.bedfront = game.add.sprite(128, 176, 'bed', 1);
 
+        this.indicator = game.add.sprite(128, 160, 'down', 0);
+        this.indicator.visible = false;
+        game.add.tween(this.indicator)
+            .to({y: this.indicator.y + 3, alpha: 0},
+                2000, Phaser.Easing.Linear.None, true, 0, 0)
+            .loop(true);
+
         this.birdseed = game.add.sprite(0, 0, 'bird', 5);
         this.birdseed.ready = true;
 
@@ -86,7 +94,8 @@ var mainState = {
 
         this.title = game.add.sprite(32, 64, 'title');
         this.title.alpha = 0;
-        game.add.tween(this.title).to( { alpha: 1 }, 2000, Phaser.Easing.Linear.None, true, 0);
+        game.add.tween(this.title).to({ alpha: 1 }, 500, Phaser.Easing.Linear.None, true, 0)
+            .onComplete.addOnce(() => { this.canPlay = true; });
 
         game.physics.arcade.enable(this.player);
         game.physics.arcade.enable(this.birdseed);
@@ -151,8 +160,8 @@ var mainState = {
         else {
             this.player.animations.play(cat.STATES.sit, cat.STATES.sit + 1, true);
             this.checkKeys(now);
-            if (this.keyCheck.up) {
-                game.add.tween(this.title).to( { alpha: 0 }, 500, Phaser.Easing.Linear.None, true, 0);
+            if (this.keyCheck.up && this.canPlay) {
+                game.add.tween(this.title).to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, true, 0);
                 this.state = 'play';
             }
         }
@@ -323,6 +332,7 @@ var mainState = {
     hideTrap() {
         if (this.ready) return;
         // TODO: start music here
+        this.indicator.visible = true;
         this.map.setCollisionBetween(1, 100, false, 'Trap');
         this.trapLayer.visible = false;
         this.startLayer.visible = false;
@@ -334,6 +344,8 @@ var mainState = {
             1000, Phaser.Easing.Linear.In, true, 0, 0);
         game.add.tween(this.water).to({ alpha: 0 },
             1000, Phaser.Easing.Linear.In, true, 0, 0);
+        game.add.tween(this.indicator).to({y: this.indicator.y - 5},
+            2000, Phaser.Easing.Linear.None, true, 0, 0).loop(true);
 
         // prevent cat from auto-jumping away from trap
         setTimeout(() => {
