@@ -132,6 +132,10 @@ var mainState = {
         this.meow2 = game.add.audio('meow2');
         this.purr = game.add.audio('purr');
 
+        this.meow1.volume = 0.5;
+        this.meow2.volume = 0.5;
+        this.purr.volume = 0.7;
+
         // camera
         game.camera.setPosition(0, 60);
         game.camera.follow(this.fairy, Phaser.Camera.FOLLOW_PLATFORMER, 0.1, 0.1);
